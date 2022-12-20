@@ -1,0 +1,76 @@
+%% CME Assignment# 01
+clc
+close all
+clear
+ 
+%% Data points:
+% 21 unequally distributed points
+x=[1,2,4,6,7,9,10,14,17,20,21,27,29,30,31,35,40,45,46,49,51]; 
+% generating a function from points
+fx=(0.15*sin(x))./(1+2*x);
+n=length(x);
+ 
+%% SPLINE GENERATION USING BUILTIN FUNCTION FOR VERIFICATION
+ee=spline(x,fx);
+xx = linspace(0.1,52,5000); % no. of points = 5000
+figure
+plot(x,fx,'-ro',xx,ppval(ee,xx),'-k');
+grid on
+axis([0 52 -0.02 0.05])
+legend('Original Signal','Spline')
+title('Spline generation using Builtin function')
+ 
+%% CLAMPED SPLINE CODE 
+% initiliazing the variables
+h=zeros(1,n-1);
+for i=1:n-1    
+    h(i)=x(i+1)-x(i);  % gaps in the form of h
+end
+%% Calculation of Values of a
+a=fx; 
+ 
+%% Calculation of Values of c
+% for AX=B writing in matrix form 
+A=zeros(n); %initializing
+A(1,1)=1;
+A(n,n)=1;
+for i=2:n-1
+    for j=2:n
+       if i==j
+          A(i,j)=2*(h(i)+h(i-1)); 
+          A(i,j-1)=h(i-1); 
+          A(i,j+1)=h(i); 
+       end
+    end
+end
+B=zeros(n,1);
+for i=2:n-1
+   B(i)=(3*(a(i+1)-a(i))/h(i))-(3*(a(i)-a(i-1))/h(i-1));
+end
+  c=(A\B)';
+  
+%% Calculation of Values of d
+  d=zeros(1,n-1);
+  for i=1:n-1
+    d(1,i)=(c(i+1)-c(i))/(3*h(i)); 
+  end
+  
+%% Calculation of Values of b
+  b=zeros(1,n-1);
+  for i=1:n-1
+    b(1,i)=(1/h(i))*(a(i+1)-a(i))-(h(i)/3)*(2*c(i)+c(i+1)); 
+  end
+  
+%% Plotting
+figure
+  for i=1:n-1
+    xv=linspace(x(i),x(i+1),5000); 
+    S=a(i)+b(i).*(xv-x(i))+c(i).*(xv-x(i)).^2+d(i).*(xv-x(i)).^3;      
+    plot(xv,S,'-k','linewidth',1.5)    
+    hold on  
+  end
+  hold off
+  axis([0 52 -0.02 0.05])
+  title('Spline generation using Mathematical calculations')
+  grid on
+ 
