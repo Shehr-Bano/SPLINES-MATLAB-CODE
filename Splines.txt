@@ -1,4 +1,3 @@
-%% CME Assignment# 01
 clc
 close all
 clear
